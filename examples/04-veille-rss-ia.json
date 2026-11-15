@@ -1,0 +1,97 @@
+{
+  "name": "Veille RSS résumée par IA",
+  "description": "Lit un flux RSS, garde les 3 derniers articles, les fait résumer par une IA locale gratuite (Ollama) et enregistre le tout dans un fichier.",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "manual",
+      "name": "Déclencheur manuel",
+      "position": {
+        "x": 60,
+        "y": 200
+      },
+      "params": {}
+    },
+    {
+      "id": "rss",
+      "type": "rss",
+      "name": "Lire le flux",
+      "position": {
+        "x": 320,
+        "y": 200
+      },
+      "params": {
+        "url": "https://hnrss.org/frontpage"
+      }
+    },
+    {
+      "id": "limit",
+      "type": "limit",
+      "name": "3 derniers",
+      "position": {
+        "x": 580,
+        "y": 200
+      },
+      "params": {
+        "max": 3
+      }
+    },
+    {
+      "id": "ai",
+      "type": "ai",
+      "name": "Résumer",
+      "position": {
+        "x": 840,
+        "y": 200
+      },
+      "params": {
+        "baseUrl": "http://localhost:11434/v1",
+        "apiKey": "",
+        "model": "llama3.2",
+        "system": "Tu résumes des articles en français, en deux phrases maximum.",
+        "prompt": "Titre : {{ $json.titre }}\nContenu : {{ $json.resume }}",
+        "temperature": 0.3
+      }
+    },
+    {
+      "id": "file",
+      "type": "writeFile",
+      "name": "Enregistrer",
+      "position": {
+        "x": 1100,
+        "y": 200
+      },
+      "params": {
+        "name": "veille.md",
+        "content": "## {{ $json.titre }}\n{{ $json.reponse }}\n{{ $json.lien }}\n",
+        "append": true
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "start-rss-0",
+      "from": "start",
+      "fromOutput": 0,
+      "to": "rss"
+    },
+    {
+      "id": "rss-limit-0",
+      "from": "rss",
+      "fromOutput": 0,
+      "to": "limit"
+    },
+    {
+      "id": "limit-ai-0",
+      "from": "limit",
+      "fromOutput": 0,
+      "to": "ai"
+    },
+    {
+      "id": "ai-file-0",
+      "from": "ai",
+      "fromOutput": 0,
+      "to": "file"
+    }
+  ]
+}

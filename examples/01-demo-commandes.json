@@ -1,0 +1,148 @@
+{
+  "name": "Démo : trier des commandes",
+  "description": "Fonctionne tout de suite, sans compte ni connexion : génère des commandes, sépare les grosses des petites, puis fait le total.",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "manual",
+      "name": "Déclencheur manuel",
+      "position": {
+        "x": 60,
+        "y": 200
+      },
+      "params": {}
+    },
+    {
+      "id": "gen",
+      "type": "code",
+      "name": "Générer des commandes",
+      "position": {
+        "x": 320,
+        "y": 200
+      },
+      "params": {
+        "code": "// Données d'exemple (montants en FCFA)\nreturn [\n  { client: 'Awa', ville: 'Abidjan', montant: 45000 },\n  { client: 'Koffi', ville: 'Bouaké', montant: 8000 },\n  { client: 'Mariam', ville: 'Yamoussoukro', montant: 120000 },\n  { client: 'Yao', ville: 'Abidjan', montant: 3500 },\n];\n"
+      }
+    },
+    {
+      "id": "if",
+      "type": "if",
+      "name": "Grosse commande ?",
+      "position": {
+        "x": 580,
+        "y": 200
+      },
+      "params": {
+        "left": "{{ $json.montant }}",
+        "operator": "gte",
+        "right": "40000"
+      }
+    },
+    {
+      "id": "vip",
+      "type": "set",
+      "name": "Marquer VIP",
+      "position": {
+        "x": 840,
+        "y": 110
+      },
+      "params": {
+        "fields": [
+          {
+            "key": "categorie",
+            "value": "VIP"
+          },
+          {
+            "key": "message",
+            "value": "Merci {{ $json.client }} ! Livraison offerte à {{ $json.ville }}."
+          }
+        ],
+        "keep": true
+      }
+    },
+    {
+      "id": "std",
+      "type": "set",
+      "name": "Marquer standard",
+      "position": {
+        "x": 840,
+        "y": 300
+      },
+      "params": {
+        "fields": [
+          {
+            "key": "categorie",
+            "value": "standard"
+          }
+        ],
+        "keep": true
+      }
+    },
+    {
+      "id": "merge",
+      "type": "merge",
+      "name": "Fusionner",
+      "position": {
+        "x": 1100,
+        "y": 200
+      },
+      "params": {}
+    },
+    {
+      "id": "total",
+      "type": "code",
+      "name": "Calculer le total",
+      "position": {
+        "x": 1360,
+        "y": 200
+      },
+      "params": {
+        "code": "const total = items.reduce((somme, c) => somme + c.montant, 0);\nreturn {\n  commandes: items.length,\n  vip: items.filter((c) => c.categorie === 'VIP').length,\n  total,\n  resume: `${items.length} commandes pour ${total.toLocaleString('fr-FR')} FCFA`,\n};\n"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "start-gen-0",
+      "from": "start",
+      "fromOutput": 0,
+      "to": "gen"
+    },
+    {
+      "id": "gen-if-0",
+      "from": "gen",
+      "fromOutput": 0,
+      "to": "if"
+    },
+    {
+      "id": "if-vip-0",
+      "from": "if",
+      "fromOutput": 0,
+      "to": "vip"
+    },
+    {
+      "id": "if-std-1",
+      "from": "if",
+      "fromOutput": 1,
+      "to": "std"
+    },
+    {
+      "id": "vip-merge-0",
+      "from": "vip",
+      "fromOutput": 0,
+      "to": "merge"
+    },
+    {
+      "id": "std-merge-0",
+      "from": "std",
+      "fromOutput": 0,
+      "to": "merge"
+    },
+    {
+      "id": "merge-total-0",
+      "from": "merge",
+      "fromOutput": 0,
+      "to": "total"
+    }
+  ]
+}

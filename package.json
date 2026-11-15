@@ -1,0 +1,19 @@
+{
+  "name": "raze-flow",
+  "version": "1.0.0",
+  "description": "RAZE Flow — automatisation de workflows par nœuds, gratuite et open source (alternative légère à n8n).",
+  "main": "src/server.js",
+  "bin": { "raze-flow": "src/server.js" },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test"
+  },
+  "keywords": ["workflow", "automation", "n8n", "no-code", "low-code", "open-source", "webhook", "cron"],
+  "license": "MIT",
+  "engines": { "node": ">=18.17" },
+  "dependencies": {
+    "express": "^4.21.2",
+    "nodemailer": "^6.9.16"
+  }
+}

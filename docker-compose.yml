@@ -1,0 +1,14 @@
+services:
+  raze-flow:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      RAZE_USER: admin
+      RAZE_PASSWORD: changez-moi   # ← à modifier avant de démarrer
+      TZ: Africa/Abidjan
+    volumes:
+      - raze-data:/data
+volumes:
+  raze-data:

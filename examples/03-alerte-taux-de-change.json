@@ -1,0 +1,116 @@
+{
+  "name": "Alerte taux de change → Telegram",
+  "description": "Chaque matin à 8h, récupère le taux USD → XOF (API gratuite, sans clé) et envoie une alerte Telegram s'il dépasse votre seuil.",
+  "nodes": [
+    {
+      "id": "cron",
+      "type": "schedule",
+      "name": "Tous les jours à 8h",
+      "position": {
+        "x": 60,
+        "y": 200
+      },
+      "params": {
+        "mode": "cron",
+        "every": 5,
+        "unit": "minutes",
+        "cron": "0 8 * * *"
+      }
+    },
+    {
+      "id": "api",
+      "type": "http",
+      "name": "Taux du jour",
+      "position": {
+        "x": 320,
+        "y": 200
+      },
+      "params": {
+        "method": "GET",
+        "url": "https://open.er-api.com/v6/latest/USD",
+        "headers": [],
+        "query": [],
+        "bodyType": "json",
+        "body": "",
+        "timeout": 30,
+        "failOnError": true
+      }
+    },
+    {
+      "id": "taux",
+      "type": "set",
+      "name": "Extraire XOF",
+      "position": {
+        "x": 580,
+        "y": 200
+      },
+      "params": {
+        "fields": [
+          {
+            "key": "xof",
+            "value": "{{ $json.data.rates.XOF }}"
+          },
+          {
+            "key": "date",
+            "value": "{{ $json.data.time_last_update_utc }}"
+          }
+        ],
+        "keep": false
+      }
+    },
+    {
+      "id": "seuil",
+      "type": "if",
+      "name": "Au-dessus du seuil ?",
+      "position": {
+        "x": 840,
+        "y": 200
+      },
+      "params": {
+        "left": "{{ $json.xof }}",
+        "operator": "gt",
+        "right": "600"
+      }
+    },
+    {
+      "id": "tg",
+      "type": "telegram",
+      "name": "Alerte Telegram",
+      "position": {
+        "x": 1100,
+        "y": 110
+      },
+      "params": {
+        "token": "{{ $env.TELEGRAM_TOKEN }}",
+        "chatId": "",
+        "text": "💱 1 USD = {{ $json.xof }} FCFA ({{ $json.date }})"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "cron-api-0",
+      "from": "cron",
+      "fromOutput": 0,
+      "to": "api"
+    },
+    {
+      "id": "api-taux-0",
+      "from": "api",
+      "fromOutput": 0,
+      "to": "taux"
+    },
+    {
+      "id": "taux-seuil-0",
+      "from": "taux",
+      "fromOutput": 0,
+      "to": "seuil"
+    },
+    {
+      "id": "seuil-tg-0",
+      "from": "seuil",
+      "fromOutput": 0,
+      "to": "tg"
+    }
+  ]
+}

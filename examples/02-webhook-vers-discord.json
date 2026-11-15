@@ -1,0 +1,118 @@
+{
+  "name": "Formulaire de contact → Discord",
+  "description": "Reçoit un formulaire par webhook (nom, email, message) et prévient votre salon Discord. Collez l'URL de votre webhook Discord puis activez le workflow.",
+  "nodes": [
+    {
+      "id": "hook",
+      "type": "webhook",
+      "name": "Webhook contact",
+      "position": {
+        "x": 60,
+        "y": 200
+      },
+      "params": {
+        "path": "contact",
+        "method": "POST",
+        "responseMode": "lastNode"
+      }
+    },
+    {
+      "id": "check",
+      "type": "if",
+      "name": "Message présent ?",
+      "position": {
+        "x": 320,
+        "y": 200
+      },
+      "params": {
+        "left": "{{ $json.body.message }}",
+        "operator": "isNotEmpty",
+        "right": ""
+      }
+    },
+    {
+      "id": "discord",
+      "type": "discord",
+      "name": "Prévenir Discord",
+      "position": {
+        "x": 580,
+        "y": 110
+      },
+      "params": {
+        "webhookUrl": "",
+        "content": "📩 Nouveau message de **{{ $json.body.nom }}** ({{ $json.body.email }}) :\n{{ $json.body.message }}",
+        "username": "RAZE Flow"
+      }
+    },
+    {
+      "id": "ok",
+      "type": "set",
+      "name": "Réponse OK",
+      "position": {
+        "x": 840,
+        "y": 110
+      },
+      "params": {
+        "fields": [
+          {
+            "key": "ok",
+            "value": "{{ true }}"
+          },
+          {
+            "key": "message",
+            "value": "Merci, votre message est bien reçu."
+          }
+        ],
+        "keep": false
+      }
+    },
+    {
+      "id": "ko",
+      "type": "set",
+      "name": "Réponse erreur",
+      "position": {
+        "x": 580,
+        "y": 300
+      },
+      "params": {
+        "fields": [
+          {
+            "key": "ok",
+            "value": "{{ false }}"
+          },
+          {
+            "key": "message",
+            "value": "Le champ « message » est obligatoire."
+          }
+        ],
+        "keep": false
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "hook-check-0",
+      "from": "hook",
+      "fromOutput": 0,
+      "to": "check"
+    },
+    {
+      "id": "check-discord-0",
+      "from": "check",
+      "fromOutput": 0,
+      "to": "discord"
+    },
+    {
+      "id": "discord-ok-0",
+      "from": "discord",
+      "fromOutput": 0,
+      "to": "ok"
+    },
+    {
+      "id": "check-ko-1",
+      "from": "check",
+      "fromOutput": 1,
+      "to": "ko"
+    }
+  ]
+}
