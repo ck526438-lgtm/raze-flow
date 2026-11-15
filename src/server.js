@@ -135,20 +135,32 @@ app.use((err, req, res, _next) => {
   res.status(status).json({ error: err.message || 'Erreur interne' });
 });
 
-function start() {
-  const server = app.listen(PORT, HOST, () => {
-    const s = scheduler.sync();
-    console.log(`\n  RAZE Flow est prêt →  http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${server.address().port}`);
-    console.log(`  Données : ${store.DATA_DIR}`);
-    console.log(`  Planifications actives : ${s.intervals + s.crons}`);
-    if (!USER || !PASSWORD) console.log('  ⚠ Aucun mot de passe : définissez RAZE_USER et RAZE_PASSWORD avant d’exposer le serveur sur Internet.\n');
+function start({ port = PORT, host = HOST, quiet = false } = {}) {
+  return new Promise((resolve, reject) => {
+    const server = app.listen(port, host);
+    server.once('error', reject);
+    server.once('listening', () => {
+      const s = scheduler.sync();
+      if (!quiet) {
+        console.log(`\n  RAZE Flow est prêt →  http://${host === '0.0.0.0' ? 'localhost' : host}:${server.address().port}`);
+        console.log(`  Données : ${store.DATA_DIR}`);
+        console.log(`  Planifications actives : ${s.intervals + s.crons}`);
+        if (!USER || !PASSWORD) console.log('  ⚠ Aucun mot de passe : définissez RAZE_USER et RAZE_PASSWORD avant d’exposer le serveur sur Internet.\n');
+      }
+      resolve(server);
+    });
   });
-  const shutdown = () => { scheduler.stop(); server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 2000).unref(); };
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
-  return server;
 }
 
-if (require.main === module) start();
+if (require.main === module) {
+  start().then((server) => {
+    const shutdown = () => { scheduler.stop(); server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 2000).unref(); };
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
+  }).catch((err) => {
+    console.error(err.code === 'EADDRINUSE' ? `Le port ${PORT} est déjà utilisé : fermez l'autre programme ou changez PORT.` : err);
+    process.exit(1);
+  });
+}
 
 module.exports = { app, start, scheduler };

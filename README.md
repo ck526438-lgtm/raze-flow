@@ -16,6 +16,7 @@
 ## Pourquoi RAZE Flow ?
 
 - **Gratuit, sans limite** : pas de compte, pas d'abonnement, pas de quota d'exécutions.
+- **Application Windows** prête à installer, ou serveur à héberger soi-même.
 - **Léger** : Node.js + 2 dépendances. Pas de base de données, pas d'étape de build. Tourne sur un petit VPS, un Raspberry Pi ou un téléphone (Termux).
 - **Éditeur visuel** : glisser, relier, exécuter. Fonctionne à la souris **et au doigt** sur mobile.
 - **Vos données restent chez vous** : tout est stocké en fichiers JSON dans `data/`.
@@ -35,7 +36,22 @@ Grâce aux nœuds **Requête HTTP** et **Code JavaScript**, vous pouvez brancher
 
 ## Installation
 
-Il faut [Node.js](https://nodejs.org) 18.17 ou plus récent.
+### Application Windows
+
+Téléchargez l'installateur depuis la page [**Releases**](https://github.com/ck526438-lgtm/raze-flow/releases/latest) :
+
+- `RAZE-Flow-Setup-x.y.z.exe` — installateur classique (raccourci sur le bureau) ;
+- `RAZE-Flow-Portable-x.y.z.exe` — version portable, sans installation.
+
+L'application s'ouvre dans sa propre fenêtre. Quand vous la fermez, elle reste dans la zone de notification (près de l'horloge) pour que vos webhooks et planifications continuent ; un clic droit sur l'icône permet de la lancer au démarrage de Windows ou de la quitter. Vos données sont dans `%APPDATA%\RAZE Flow\data`.
+
+> L'exécutable n'est pas signé : au premier lancement, Windows SmartScreen affiche un avertissement. Cliquez sur « Informations complémentaires » puis « Exécuter quand même ».
+
+Pour construire l'application vous-même : `npm install` puis `npm run dist:win` (sous Windows).
+
+### Depuis le code source
+
+Il faut [Node.js](https://nodejs.org) 20 ou plus récent.
 
 ```bash
 git clone https://github.com/ck526438-lgtm/raze-flow.git
@@ -78,7 +94,7 @@ Tout passe par des variables d'environnement (voir [`.env.example`](.env.example
 
 ```bash
 cp .env.example .env
-node --env-file=.env src/server.js     # Node 20.6+
+node --env-file=.env src/server.js
 ```
 
 ## Les expressions

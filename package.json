@@ -1,19 +1,87 @@
 {
   "name": "raze-flow",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "RAZE Flow — automatisation de workflows par nœuds, gratuite et open source (alternative légère à n8n).",
-  "main": "src/server.js",
-  "bin": { "raze-flow": "src/server.js" },
+  "main": "electron/main.js",
+  "bin": {
+    "raze-flow": "src/server.js"
+  },
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "app": "electron .",
+    "dist:win": "electron-builder --win --publish never"
   },
-  "keywords": ["workflow", "automation", "n8n", "no-code", "low-code", "open-source", "webhook", "cron"],
+  "keywords": [
+    "workflow",
+    "automation",
+    "n8n",
+    "no-code",
+    "low-code",
+    "open-source",
+    "webhook",
+    "cron"
+  ],
   "license": "MIT",
-  "engines": { "node": ">=18.17" },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "express": "^4.21.2",
-    "nodemailer": "^6.9.16"
+    "nodemailer": "^10.5.0"
+  },
+  "author": "Christ (ck526438-lgtm)",
+  "homepage": "https://github.com/ck526438-lgtm/raze-flow",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ck526438-lgtm/raze-flow.git"
+  },
+  "devDependencies": {
+    "electron": "^45.3.2",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "ci.razeflow.app",
+    "productName": "RAZE Flow",
+    "copyright": "Copyright © 2026 Christ (ck526438-lgtm)",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "public/**/*",
+      "examples/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "RAZE Flow",
+      "artifactName": "RAZE-Flow-Setup-${version}.${ext}",
+      "language": "1036"
+    },
+    "portable": {
+      "artifactName": "RAZE-Flow-Portable-${version}.${ext}"
+    }
   }
 }
