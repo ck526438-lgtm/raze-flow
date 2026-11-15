@@ -1,7 +1,8 @@
 name: Application Windows
 on:
   push:
-    tags: ['v*']
+    branches: [main]
+    paths: ['electron/**', 'src/**', 'public/**', 'package*.json', '.github/workflows/windows.yml']
   pull_request:
     paths: ['electron/**', 'src/**', 'public/**', 'package*.json', '.github/workflows/windows.yml']
   workflow_dispatch:
@@ -32,9 +33,28 @@ jobs:
           name: raze-flow-windows
           path: dist/*.exe
           if-no-files-found: error
+      # Sur main : publie une Release « v<version de package.json> » si elle n'existe pas encore
+      - name: Version à publier
+        id: version
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="v$(node -p "require('./package.json').version")"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if gh release view "$tag" -R "$GITHUB_REPOSITORY" > /dev/null 2>&1; then echo "publish=false" >> "$GITHUB_OUTPUT"; else echo "publish=true" >> "$GITHUB_OUTPUT"; fi
       - name: Publier la version
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: steps.version.outputs.publish == 'true'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: RAZE Flow ${{ steps.version.outputs.tag }}
           files: dist/*.exe
           generate_release_notes: true
+          body: |
+            **RAZE-Flow-Setup** : installateur Windows (raccourci sur le bureau).
+            **RAZE-Flow-Portable** : version portable, sans installation.
+
+            L'exécutable n'est pas signé : au premier lancement, Windows SmartScreen affiche un avertissement — « Informations complémentaires » puis « Exécuter quand même ».
