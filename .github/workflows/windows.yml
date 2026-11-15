@@ -1,0 +1,40 @@
+name: Application Windows
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+    paths: ['electron/**', 'src/**', 'public/**', 'package*.json', '.github/workflows/windows.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Construire l'installateur et la version portable
+        run: npm run dist:win
+      - name: Test de démarrage de l'application
+        shell: pwsh
+        run: |
+          $env:RAZE_SMOKE = '1'
+          $p = Start-Process -FilePath "dist\win-unpacked\RAZE Flow.exe" -Wait -PassThru
+          Write-Host "Code de sortie : $($p.ExitCode)"
+          if ($p.ExitCode -ne 0) { exit 1 }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: raze-flow-windows
+          path: dist/*.exe
+          if-no-files-found: error
+      - name: Publier la version
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.exe
+          generate_release_notes: true

@@ -6,3 +6,6 @@ data/
 .git
 .github
 test
+dist/
+build/
+electron/
